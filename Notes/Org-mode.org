@@ -65,15 +65,48 @@
 | 李四 |     95 |     27 |  61  |
 #+TBLFM: $4=$2*0.5+$3*0.5
   如果要插入显得行或者列
+* 链接
+org准许你插入链接来链接一些资源地址，如url、图片、文件等。
+链接的格式为： 
+#+BEGIN_SRC org
+ [[链接地址][链接名称]]
+#+END_SRC
+例如：
+#+BEGIN_SRC org
+ [[http://orgmode.org/img/org-mode-unicorn-logo.png][org-mode.png]]
+ [[https://github.com/][github]]
+ [[https://github.com/Lkerenl/Essay/blob/master/Notes/Org-mode.org][README]]
+#+END_SRC
+
+ [[http://orgmode.org/img/org-mode-unicorn-logo.png][org-mode.png]]
+ [[https://github.com/][github]]
+ [[https://github.com/Lkerenl/Essay/blob/master/Notes/Org-mode.org][README]]
+
+* 标签 X
 * 富文本
 ** 特殊文本
    org-mode有一些特殊的文本格式：
+#+BEGIN_SRC emacs-lisp 
    + *粗体*
    + /斜体/
    + _下划线_
    + =代码=
    + ~代码~
    + +删除线+
+   + 上标2^10
+   + 下标H_2 O
+#+END_SRC
+
+   + *粗体*
+   + /斜体/
+   + _下划线_
+   + =代码=
+   + ~代码~
+   + +删除线+
+   + 上标2^10
+   + 下标H_2 O
+若要禁用上下标，可在文件开头的OPTION加上 ~^:nil:~ 。
+~#+option: ^:nil:~
 ** 时间
  + ~C-u M+! date~
    + Tue Aug  1 20:00:49 CST 2017 
@@ -87,9 +120,27 @@
    + [2017-08-01 Tue 23:54]
 
 用 ~[]~ 括起来的时间戳与活动无关。
-
+按下快捷键时会出现一个日历，可用 ~S+left/right/up/down~ 进行选择。
 ** 代码块
-   org-mode可以直接求出源代码的运行结果，但是需要配置：
+~#+BEGIN_SRC ... #+END_SRC~ 可以生成代码块
+** 图片
+在emacs里默认不显示图片，需按 ~C-c C-x C-v~ 才会显示图片，或在导出成其他格式后也能看到。
+或键入 ~M-x~ 运行 ~iimage-mode~ 也可以在emacs中显示/隐藏图片。
+#+BEGIN_SRC org
+[[./timg.jpg]]
+[[file:timg.jpg]]
+#+END_SRC
+
+
+[[./timg.jpg]]
+
+[[file:timg.jpg]]
+* 待办事项 X
+* 导出 X
+* 常用快捷键 X
+* 小技巧
+** 代码块高亮并显示运行结果
+org-mode可以直接求出源代码的运行结果，但是需要配置：
 #+BEGIN_SRC
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -116,11 +167,11 @@
 
 #+BEGIN_SRC python :results output
   print('A'*5)
-  import pwn
-  print(pwn.shellcraft.sh())
 #+END_SRC
 
 #+RESULTS:
+: AAAAA
+
 
 #+begin_src C :includes <stdio.h>
   int a=1;
@@ -131,3 +182,19 @@
 #+RESULTS:
 : 2
 
+也可以加入一些参数：
+#+BEGIN_SRC python -n -t
+import numpy as np
+import matplotlib.pyplot as plt
+x = np.arange(-np.pi,np.pi,0.01)
+y = np.sin(x)
+plt.plot(x,y)
+plt.show()
+#+END_SRC
+
+#+RESULTS:
+: None
+
+** 快速输入#+BEGIN_SRC ... #+END_SRC
+输入 ~<s~ 再按 ~TAB~ 就会自动展开为 ~#+BEGIN_SRC ... #+END_SRC~ 。
+同样输入 ~<e~ 再按 ~TAB~ 就会自动展开为 ~#+BEGIN_EXAMPLE ... #+END_EXAMPLE~ 。
