@@ -233,6 +233,8 @@ org-mode可以直接求出源代码的运行结果，但是需要配置：
 #+RESULTS:
 : 2
 *** 显示行号
+# +BEGIN_SRC org
+
 #+BEGIN_SRC python -n -t
 import numpy as np
 import matplotlib.pyplot as plt
@@ -245,6 +247,7 @@ plt.show()
 #+RESULTS:
 : None
 
+# +END_SRC
 其中，-n会显示行号，-t参数会清除格式。
 ** 快速输入 ~#+BEGIN_SRC ... #+END_SRC~
 输入 ~<s~ 再按 ~TAB~ 就会自动展开为 ~#+BEGIN_SRC ... #+END_SRC~ 。                                                               
