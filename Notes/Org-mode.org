@@ -6,12 +6,13 @@
 * 脚注
   使用 ~[fn:1]~ 的方式插入脚注，在最下边插入
   ~[fn:1]本文参考自http://orgmode.org/orgguide.pdf~
-  [fn:1]
-  [fn:1]本文参考自http://orgmode.org/orgguide.pdf
+  要顶格写[fn:1]
+  
+[fn:1]本文参考自http://orgmode.org/orgguide.pdf
   这个标签是有效的，可以点击。
 * 列表
   列表可以加入选项框，在标题后加上中间有空格的方括号 ~[ ]~ ，
-可以用来标识任务完成状态， 中括号中间加上一个大写X标识着任务以完成~[X]~
+可以用来标识任务完成状态， 中括号中间加上一个大写X标识着任务以完成 ~[X]~
 ** 无序列表
    无序列表以+/-开头，同样后边要跟一个空格。
    
@@ -66,6 +67,8 @@
 #+TBLFM: $4=$2*0.5+$3*0.5
   如果要插入显得行或者列
 * 链接
+<<target>>
+
 org准许你插入链接来链接一些资源地址，如url、图片、文件等。
 链接的格式为： 
 #+BEGIN_SRC org
@@ -81,8 +84,34 @@ org准许你插入链接来链接一些资源地址，如url、图片、文件�
  [[http://orgmode.org/img/org-mode-unicorn-logo.png][org-mode.png]]
  [[https://github.com/][github]]
  [[https://github.com/Lkerenl/Essay/blob/master/Notes/Org-mode.org][README]]
+** 内部链接
+内部链接类似于HTML的锚点，当org文档导出为HTML时就会变成锚点。
+内部链接的格式如下：
+#+BEGIN_SRC org
+<<target>> 
+#+END_SRC
+可以用以下方式链接到内部链接：
+#+BEGIN_SRC org
+[[target]]
+[[target][clockme]]
+#+END_SRC
 
-* 标签 X
+[[target]]
+[[target][clockme]]
+** 文件链接
+对于文件链接，可以用::后面增加定位符的方式链接到文件的特定位置。定位符可以是行号或者搜索选项。
+#+BEGIN_SRC org
+file:~/xx.org::target 跳转到内部链接     
+file:~/xx.org::#id    跳转到自定义id项
+file:~/xx.org::256    跳转到256行
+#+END_SRC
+* 注释
+以#开头的行会被看作注释，不会被导出区块注释可以用以下写法：
+#+BEGIN_COMMENT
+注释。。
+第二行注释。。
+#+END_COMMENT
+
 * 富文本
 ** 特殊文本
    org-mode有一些特殊的文本格式：
@@ -135,11 +164,17 @@ org准许你插入链接来链接一些资源地址，如url、图片、文件�
 [[./timg.jpg]]
 
 [[file:timg.jpg]]
-* 待办事项 X
-* 导出 X
+* 导出
+如果要将org文档导出为pdf需要LaTeX支持，但是导出html十分方便，但是导出的html没有任何样式，
+org-mode为每个模块都添加了css的标签，我们可以将现成的css文件直接加入，便能得到一个好看的输出样式：
+#+BEGIN_SRC 
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css">
+#+END_SRC
+接下来，按 ~C-c C-e~ 会出现一个提示框，我们按照提示导出为html。
 * 常用快捷键 X
 * 小技巧
-** 代码块高亮并显示运行结果
+** 代码块进阶
+*** 运行结果输出
 org-mode可以直接求出源代码的运行结果，但是需要配置：
 #+BEGIN_SRC
 (org-babel-do-load-languages
@@ -181,8 +216,7 @@ org-mode可以直接求出源代码的运行结果，但是需要配置：
 
 #+RESULTS:
 : 2
-
-也可以加入一些参数：
+*** 显示行号
 #+BEGIN_SRC python -n -t
 import numpy as np
 import matplotlib.pyplot as plt
@@ -195,6 +229,7 @@ plt.show()
 #+RESULTS:
 : None
 
-** 快速输入#+BEGIN_SRC ... #+END_SRC
+其中，-n会显示行号，-t参数会清除格式。
+** 快速输入 ~#+BEGIN_SRC ... #+END_SRC~
 输入 ~<s~ 再按 ~TAB~ 就会自动展开为 ~#+BEGIN_SRC ... #+END_SRC~ 。
 同样输入 ~<e~ 再按 ~TAB~ 就会自动展开为 ~#+BEGIN_EXAMPLE ... #+END_EXAMPLE~ 。
