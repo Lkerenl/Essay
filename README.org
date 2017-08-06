@@ -1,3 +1,6 @@
 #+TITLE: 随笔
 + 目录
   + README.org <2017-08-02 Wed 23:26>
+  + Notes
+    + Org-mode.org <2017-08-06 Sun 14:06>
+    + artistmode.org <2017-08-06 Sun 20:14>
