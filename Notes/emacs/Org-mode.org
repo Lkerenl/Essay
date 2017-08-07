@@ -1,0 +1,255 @@
+#+STARTUP: indent
+#+TITLE: org-mode学习笔记
+* 章节
+** 这是一个二级标题
+*** 有几个*就是几级标题
+* 脚注
+  使用 ~[fn:1]~ 的方式插入脚注，在最下边插入
+  ~[fn:1]本文参考自http://orgmode.org/orgguide.pdf~
+  要顶格写[fn:1]
+  
+[fn:1]本文参考自http://orgmode.org/orgguide.pdf
+  这个标签是有效的，可以点击。
+* 列表
+  列表可以加入选项框，在标题后加上中间有空格的方括号 ~[ ]~ ，
+可以用来标识任务完成状态， 中括号中间加上一个大写X标识着任务以完成 ~[X]~
+** 无序列表
+   无序列表以+/-开头，同样后边要跟一个空格。
+   
+   + 这是一个无序列表
+     + branch1
+     + branch2
+
+** 有序列表
+   有序列表以1./1)开头，一样要加空格。
+
+   1. 作业[33%]
+      1. [ ] 高等数学
+      2. [-] 大学物理[1/2]
+         1. [ ] 理论
+         2. [X] 实验
+      3. [X] 电路分析  
+   2. 活动 [1/2]
+      1. [X] 冒险岛
+      2. [ ] 魔兽世界
+* 表格
+  org-mode支持类似excel的表格函数，可以完成简单的求和等操作。
+创建表格时，首先输入表头：
+
+#+BEGIN_SRC
+| 姓名 | 平时分 | 考试分 | 总分 | 
+|-
+#+END_SRC
+
+在 ~|-~ 后按Tab就可得到如下： 
+
+| 姓名 | 平时分 | 考试分 | 总分 |
+|------+--------+--------+------|
+|      |        |        |      |
+然后我们填入数据：
+| 姓名 | 平时分 | 考试分 | 总分 |
+|------+--------+--------+------|
+| 张三 |     88 |     45 |      |
+| 李四 |     95 |     27 |      |
+| 何二 |     85 |     55 |      |
+
+填入数据时按Tab可以调到右方表格，按Enter是下方，S+Tab/Enter是反向。
+当然上下左右也是可以移动光标位置，但是不会新建表格行。
+输入完成后 ~C-c C-c~ 可自动对齐。
+可以在总分那一栏任意一格输入 ~=$2*0.5+$3*0.5~ 按 ~C-u C-c C-c~ 便能所有计算总分 。
+若要计算某一格直接键入 ~C-c C-c~ 就行。
+
+| 姓名 | 平时分 | 考试分 | 总分 |
+|------+--------+--------+------|
+| 何二 |     85 |     55 |  70  |
+| 张三 |     88 |     45 | 66.5 |
+| 李四 |     95 |     27 |  61  |
+#+TBLFM: $4=$2*0.5+$3*0.5
+  如果要插入显得行或者列
+* 链接
+<<target>>
+
+org准许你插入链接来链接一些资源地址，如url、图片、文件等。
+链接的格式为： 
+#+BEGIN_SRC org
+ [[链接地址][链接名称]]
+#+END_SRC
+例如：
+#+BEGIN_SRC org
+ [[http://orgmode.org/img/org-mode-unicorn-logo.png][org-mode.png]]
+ [[https://github.com/][github]]
+ [[https://github.com/Lkerenl/Essay/blob/master/Notes/Org-mode.org][README]]
+#+END_SRC
+
+ [[http://orgmode.org/img/org-mode-unicorn-logo.png][org-mode.png]]
+ [[https://github.com/][github]]
+ [[https://github.com/Lkerenl/Essay/blob/master/Notes/Org-mode.org][README]]
+** 内部链接
+内部链接类似于HTML的锚点，当org文档导出为HTML时就会变成锚点。
+内部链接的格式如下：
+#+BEGIN_SRC org
+<<target>> 
+#+END_SRC
+可以用以下方式链接到内部链接：
+#+BEGIN_SRC org
+[[target]]
+[[target][clockme]]
+#+END_SRC
+
+[[target]]
+[[target][clockme]]
+** 文件链接
+对于文件链接，可以用::后面增加定位符的方式链接到文件的特定位置。定位符可以是行号或者搜索选项。
+#+BEGIN_SRC org
+file:~/xx.org::target 跳转到内部链接     
+file:~/xx.org::#id    跳转到自定义id项
+file:~/xx.org::256    跳转到256行
+#+END_SRC
+* 注释
+以#开头的行会被看作注释，不会被导出区块注释可以用以下写法：
+#+BEGIN_COMMENT
+注释。。
+第二行注释。。
+#+END_COMMENT
+
+* 富文本
+** 特殊文本
+   org-mode有一些特殊的文本格式：
+#+BEGIN_SRC emacs-lisp 
+   + *粗体*
+   + /斜体/
+   + _下划线_
+   + =代码=
+   + ~代码~
+   + +删除线+
+   + 上标2^10
+   + 下标H_2 O
+#+END_SRC
+
+   + *粗体*
+   + /斜体/
+   + _下划线_
+   + =代码=
+   + ~代码~
+   + +删除线+
+   + 上标2^10
+   + 下标H_2 O
+若要禁用上下标，可在文件开头的OPTION加上 ~^:nil:~ 。
+~#+option: ^:nil:~
+** 时间
+ + ~C-u M+! date~
+   + Tue Aug  1 20:00:49 CST 2017 
+ + ~C-c .~
+   + <2017-08-01 Tue>
+ + ~C-u C-c .~
+   + <2017-08-01 Tue 23:51>
+ + ~C-c !~
+   + [2017-08-01 Tue]
+ + ~C-u C-c !~
+   + [2017-08-01 Tue 23:54]
+
+用 ~[]~ 括起来的时间戳与活动无关。
+按下快捷键时会出现一个日历，可用 ~S+left/right/up/down~ 进行选择。
+** 代码块
+~#+BEGIN_SRC ... #+END_SRC~ 可以生成代码块
+** 图片
+在emacs里默认不显示图片，需按 ~C-c C-x C-v~ 才会显示图片，或在导出成其他格式后也能看到。
+或键入 ~M-x~ 运行 ~iimage-mode~ 也可以在emacs中显示/隐藏图片。
+#+BEGIN_SRC org
+[[./timg.jpg]]
+[[file:timg.jpg]]
+#+END_SRC
+
+
+[[./timg.jpg]]
+
+[[file:timg.jpg]]
+* 导出
+如果要将org文档导出为pdf需要LaTeX支持，但是导出html十分方便，但是导出的html没有任何样式，
+org-mode为每个模块都添加了css的标签，我们可以将现成的css文件直接加入，便能得到一个好看的输出样式：
+#+BEGIN_SRC 
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css">
+#+END_SRC
+接下来，按 ~C-c C-e~ 会出现一个提示框，我们按照提示导出为html。
+* 常用快捷键
+在orgmode里，相同的快捷键在不通的情况下有不同的功能。但总体来说也差不多。
+下面列出一些常用的
+| 快捷键         | 功能                               | 备注         |
+|----------------+------------------------------------+--------------|
+| ~M+ret~        | 建立一个同级项目                   | 列表、标题等 |
+| ~C-c C-c~      | 执行代码，改编选项框状态等         |              |
+| ~C-c C-n~      | 移动到下一个标题                   |              |
+| ~C-c C-p~      | 移动到上一个标题                   |              |
+| ~C-c C-f~      | 移动到和当前标题同等级的下一个标题 |              |
+| ~C-c C-b~      | 移动到和当前标题同等级的上一个标题 |              |
+| ~C-c C-u~      | 向上移动到更高一层的标题           |              |
+| ~M+up/down~    | 项目上\下移                        |              |
+| ~M+left/right~ | 改变项目层级关系                   |              |
+| ~C-c C-e~      | 导出                               |              |
+|----------------+------------------------------------+--------------|
+ 
+* 小技巧
+** 代码块进阶
+*** 运行结果输出
+org-mode可以直接求出源代码的运行结果，但是需要配置：
+#+BEGIN_SRC
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (sh . t)
+   (python . t)
+   (R . t)
+   (ruby . t)
+   (ditaa . t)
+   (dot . t)
+   (octave . t)
+   (sqlite . t)
+   (perl . t)
+   (C . t)
+   ))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(+ 1 2 3 4)
+#+END_SRC
+
+#+RESULTS:
+: 10
+
+#+BEGIN_SRC python :results output
+  print('A'*5)
+#+END_SRC
+
+#+RESULTS:
+: AAAAA
+
+
+#+begin_src C :includes <stdio.h>
+  int a=1;
+  int b=1;
+  printf("%d\n", a+b);
+#+end_src
+
+#+RESULTS:
+: 2
+*** 显示行号
+# +BEGIN_SRC org
+
+#+BEGIN_SRC python -n -t
+import numpy as np
+import matplotlib.pyplot as plt
+x = np.arange(-np.pi,np.pi,0.01)
+y = np.sin(x)
+plt.plot(x,y)
+plt.show()
+#+END_SRC
+
+#+RESULTS:
+: None
+
+# +END_SRC
+其中，-n会显示行号，-t参数会清除格式。
+** 快速输入 ~#+BEGIN_SRC ... #+END_SRC~
+输入 ~<s~ 再按 ~TAB~ 就会自动展开为 ~#+BEGIN_SRC ... #+END_SRC~ 。                                                               
+同样输入 ~<e~ 再按 ~TAB~ 就会自动展开为 ~#+BEGIN_EXAMPLE ... #+END_EXAMPLE~ 。                                                   
+                                                                                                                                                                                        
