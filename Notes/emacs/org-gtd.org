@@ -1,0 +1,279 @@
+#+TITLE: 使用org-mode进行时间管理
+** 概述
+  使用Org-mode能够完美的解决任务管理的各种问题，包括任务划分，时间设定，任务状态跟踪，
+以及任务的检索查询。
+** 任务
+  每个任务通常附带一些文字说明，所以orgmode将标题定义为任务的载体。通过在标题上增加状态标记，
+来定义任务。由于大纲是分级的，所以就可以在子标题上定义子任务。
+
+  可以使用 ~C-c C-t~ 或者 ~S-left\right~ 来增加或改变任务标记。
+** 任务状态
+  默认orgmode的任务状态只有两种： TODO 和 DONE。如果需要更多状态，需要自己定义。
+可以在内部定义任务状态，关键字应该各不相同，这样对于一个选项，Orgmode才知道应该使用
+哪个状态序列。
+  要定义任务状态，可以使用 ~#+SEQ_TODE~ ，可以在文档的任何地方定义，但建议统一定义
+在文档头部：
+#+BEGIN_SRC org
+#+SEQ_TODE: TODO(t) STARTED(s) WAITING(w) | DONE(d) CLOSED(c) 
+#+END_SRC
+
++ 可以定义多组状态序列。
++ 状态之间使用空格分开。
++ 可在()中定义附加选项，包括：
+  + 字符：该状态的快捷键。
+  + !：切换该状态时自动添加时间戳。
+  + @：切换该状态时需要文字说明。
+  + 同时使用@和!，要用@/!。
+
+其中|左边的为未完成状态，在查询代办事项时会列出。右边是已完成或因意外取消任务。
+但这只能在单独的一个文件中使用，要全局使用的话，需要在你的.emacs里进行如下配置：
+
+#+BEGIN_SRC org -t -n
+(setq org-todo-keywords
+    '((sequencep "TODO(t!)" "STARTED(s)" "WAITING(w)" "APPT(a)" 
+                 "|" "DEFERRED(f@/!)" "DONE(d)" "CLOSED(c@/!)"))
+)
+#+END_SRC
+** 优先级
+  在org-mode中有A，B，C三种优先级，在安排日程的时候可以按照优先级进行排序。
+使用 ~S-up/down~ 进行优先级的设置。
+** 跟踪子任务完成情况
+  在上级任务标题中任意位置插入[/]或[%]，当子任务状态发生改变时，会自动更新该
+位置的值，但是当子任务全部完成时，上级任务的完成状态不会自动改变，如果要设定
+自动改变完成状态，可以在.emacs中增加如下配置：
+#+BEGIN_SRC org
+(defun org-summary-todo (n-done n-not-done)
+  "Switch entry to DONE when all subentries are done, to TODO otherwise."
+  (let (org-log-done org-log-states)   ; turn off logging
+    (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+     
+(add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+#+END_SRC
+** 用复选框标记非标题子任务
+ 对于[ ]开头的列表，orgmode会被当作一个复选框，这样，就会形成局部的子任务，
+适用于将一个任务划分成几个简单的步骤。例如：
+#+BEGIN_SRC org
+*** A [1/2]
++ [X] A.1 [2/2]
+  + [X] A.1.1
+  + [X] A.1.2
++ [-] A.2 [1/2]
+  + [ ] A.2.1
+  + [X] A.2.2
+#+END_SRC
+  使用 ~C-c C-c~ 能改变复选框的状态，而 ~M-S-ret~ 能增加一个子项。
+** 任务查询 
+  ~C-c /~ 支持多种搜索方式，其中针对任务的有两种：
++ TODO : 高亮所有TODO。
++ TODO key words：高亮具有特定关键字的TODO。
+** 时间计划
+*** 时间戳
+时间戳使用<TIME>进行标记：
+#+BEGIN_SRC org
+<2017-08-08 Tue>
+<2017-08-08 Tue 15:52>
+#+END_SRC
+时间戳分为两种，标记时间点的时间戳，和标记重复时间的时间戳，上边的例子就是标记了
+一个时间点的时间戳。而标记重复时间的时间戳使用 _时间点+间隔(天(d) 周(w) 月(m) 年(y))的方式_ 
+来表示。比如：
+<2017-08-08 Tue +1d>
+表示从2017-08-08开始，每天重复一次。
+~S-left/right~ 可以以天为单位调整时间戳时间， ~S-up/down~ 能调整当前光标所在位置的时间，
+如果光标所在位置在时间戳之外，则可以改变时间戳的任务关联性（即是否在日程表中显示时间）。
+时间戳可以放在正文或者标题的任何位置。
+输入时间戳时，可以手动输入，也可以使用 ~C-c .~ 或者 ~C-u C-c .~ 。
+如果要快速输入日期，可以直接用 ~C-c <~ 。
+~C-c >~ 可以查日历。
+*** 时间\日期段
+两个时间戳之间用-连接起来，就定义了一个时间段。
+<2017-08-08 Tue>-<2017-08-10 Thu>
+连续使用C-c .可创建时间点段。
+<2017-08-08 Tue>--<2017-08-10 Thu>
+~C-c C-y~ 可以计算时间间隔。
+当时间戳包含一个时间段时，修改第一个时间会自动修改第二个时间，要改变时间间隔
+可以修改第二个时间。如：
+<2017-08-08 Tue 20:27-20:30>
+修改 _20:27_ 也会修改 _20:30_ 。
+而修改 _20:30_ 会改变时间间隔。  
+*** 计划时间和截止时间
+ orgmode中的任务还可以设置计划时间(SCHEDULED)和截止时间(DEADLINE)，
+方便任务的管理和排程。
+使用快捷键 ~C-c C-s~ 就可以设置在光标所属任务的计划时间（SCHEDULED）。
+~C-c C-d~ 可以输入截止时间（DEADLINE）。
+*** 任务计时
+    CLOCK: [2017-08-08 Tue 19:56]--[2017-08-08 Tue 19:57] =>  0:01
+    :PROPERTIES:
+    :ORDERED:  t
+    :END:
+  orgmode能够计算每项任务任务花了多长时间。你可以按
+~C-c C-x C-i~ 开始计时，完成后用 ~C-c C-x C-o~结束计时。
+** 全局任务 
+  前面都是单独org文件的任务管理。org-mode还支持多个org文件组合管理，这样你就可以
+把任务按照不同的情景模式放在不同的文件里进行组织。
+  要让org-mode知道需要把哪些文件视为全局任务的组成部份，需要设置一个清单，在你的.emcas
+中这样配置：
+#+BEGIN_SRC emacs-lisp
+(setq org-agenda-files (list "~/git/GTD/work.org"
+                             "~/git/GTD/projects.org"
+                             "~/git/GTD/home.org"
+                             "~/git/GTD/todo/"
+                           ))
+#+END_SRC
+该目录下的所有.org文件都会被加入清单，除了预定义的清单外，也可以在编辑任务文件
+时使用 ~C-C /~ 将文件加入\移除清单。可以随时通过 ~C-C /~ 循环所有的清单文件。
+** 全局任务列表
+在.emacs里进行如下配置：
+#+BEGIN_SRC emacs-lisp
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+#+END_SRC
+按 ~C-c a t~ 就可以进入到全局的任务列表里。
+在表中，可以按t改变任务状态，按ret可以跳转到该条目所在的源文件。
+按 ~C-c a a~ 可以进入日常表，日程表能根据任务的计划时间列出每天的任务。
+在日程表中按l显示日志，这样就会显示你所有已完成的任务及他们的完成时间。
+** 归档
+  无法避免的是，随着时间的流逝，被的DONE的任务会越来越多，那么TODO就会被夹杂在DONE
+之间，难以查找。同时，为了总结回顾的需要，你也不想将DONE的事件删除。这时候，你就会
+需要org的归档命令了。
+  org提供了2种归档模式：
+*** 内部归档
+  内部归档是在文件内部特定的任务进行ACHIVE标记，或者移动到本级任务的最末端
+一个叫Achibe的特殊任务中。
+  使用 ~C-c C-x a~ 可以为一个任务标记ARCHIVE的标签但他的位置不会被改变
+#+BEGIN_EXAMPLE org
+**** Task
+***** DONE A
+***** DONE B                                                        :ARCHIVE:
+***** DONE C
+#+END_EXAMPLE 
+  使用 ~C-c C-x A~ 可以的移动任务到本级任务最末端的Achibe中
+#+BEGIN_EXAMPLE org
+**** Task
+***** DONE A
+***** DONE C
+***** Archive                                                       :ARCHIVE:
+****** DONE B
+    :PROPERTIES:
+    :ARCHIVE_TIME: 2017-08-10 Thu 17:10
+    :END:
+#+END_EXAMPLE
+*** 外部归档
+  org也可以把指定任务移动到另一个文件中去，文件名可自定义，默认情况下会被移动到
+“当前文件名_archive”的文档中去。
+  可以用快捷键 ~C-c C-x C-s~ 移动当前节点到archive文件中去。
+** 标签
+*** 创建一个标签
+  你可以使用 ~C-c C-c~ 为一个任务添加一个标签。
+#+BEGIN_EXAMPLE org
+TODO A                                                            :tags: 
+#+END_EXAMPLE
+如果你需要多次创建相同的标签，最简单的方法是将他绑定到快捷键，你可以在文件头加上这样的声明：
+#+BEGIN_SRC org
+#+TAGS: @home(o) @school(s)
+#+END_SRC
+或者你需要在所有的文件中使用相同的标签，可以在你的.emcas中这样配置：
+#+BEGIN_SRC emacs-lisp
+setq org-tag-alist '(("@home" . ?h)
+                     ("@school" . ?s)))
+#+END_SRC
+
+*** 标签继承
+  如果在一个文件中，所有的任务都具有同一个特征，那么如果一个个的手动加上tags未免也太麻烦了，
+这时候就用到了标签的继承。
+在文件头加上:
+#+BEGIN_SRC org
+#+FILETAGS: :tags:
+#+END_SRC
+那么这个文件里的每个项目都会具有一个tags的标签了。
+*** 搜索标签
+  我们可以使用 ~C-c a~ 后使用match，然后输入标签关键字，就能列出全局文件里特定的标签任务了。
+如果你只想查询未完成的项目，不要用m，而用 _M_ 就行。
+
+关键字也支持逻辑运算比如 “qq&friend” 就会找到同时具有qq和friend标签的任务。
+“qq|friend” 会找到具有2个标签之一的任务。
+而"qq-friend" 会找到有qq而没有friend的任务；而“friend-qq”刚好相反，他会找到有friend而没有qq的任务。
+**** 使用快捷键代替关键字搜索
+  有时候会频繁的使用搜索，而每次都要输入那几个常用的关键字，感觉很烦，有没有简单的方法呢，
+答案是有的。我们可以使用orgmode的自定义view接口org-agenda-custom-commands.
+在你的.emacs中加入以下：
+#+BEGIN_SRC emacs-lisp
+    (setq org-agenda-custom-commands  
+    '(("h" "home play"  
+    ((agenda "")  
+    (tags-todo "@home|play")
+    (tags-todo "@home-@work")))))  
+#+END_SRC
+
+  然后就可以使用 ~C-c a h~ 调出你的view，他的描述是“home play”，他包含2段数据，第一段就是使用
+~C-c a a~ 后出来的界面agenda，然后是一个换行符，接着是包含@home或play之一标签的任务，接着又是
+一个换行符，然后是包含@home但不包含@work的任务。
+** 使用临时笔记
+  有时在使用emacs时会突然冒出一些idea，emacs提供了2中方法纪录你灵光一现的想法，
+org-capture与org-remember。
+org-capture（包括org-remember）的目的，是通过事先定义记录信息的位置、格式，
+使得我们在记录时专注于内容本身，而不是其形式。由于记录信息不再需要一系列繁琐的步骤，
+记录速度得到极大的提升，工作流程也不会被严重打断。
+*** org-capture
+  org-capture是emacs最新的特性之一，他试图取代org-remember成为emacs快速纪录的利器。
+在.emacs里如下配置：
+#+BEGIN_SRC emacs-lisp
+(global-set-key "\C-cc" 'org-capture)
+(setq org-capture-templates                                                 
+      '(("t" "Todo" entry (file+headline "~/git/GTD/Tasks.org" "Tasks")     
+        "** TODO %?\n  %i\n  %a")                                          
+                                                                            
+        ("i" "Idea" entry (file+headline "~/git/GTD/Tasks.org" "idea")      
+         "** %?\n  %i\n  %a")                                               
+                                                                            
+        ("s" "Summary" entry (file+datetree "~/git/GTD/Summary.org" "Summary")
+         "** %?\nEntered on： %U\n  %i\n  %a")                              
+                                                                            
+        ("n" "Notes" entry (file+headline "~/git/GTD/Notes.org" "Notes")    
+         "* %?\n %i\n %a")                                                  
+        ))  
+#+END_SRC
+就可以使用 ~C-c c~ 选择一种情景模式进行快速的纪录。
+其中模版元素意义如下：
+|----+------------------------|
+| %? | 输入文字               |
+| \n | 插入换行符             |
+| %i | 插入选择区域           |
+| %a | 当前光标所在标题的链接 |
+| %t | 插入日期               |
+| %T | 插入日期和时间         |
+| %g | 从目标容器的标签中选择 |
+| %G | 从全局标签中选择       |
+| %t | 输入日期时间           |
+| %x | 当前剪切版中内容       |
+|----+------------------------|
+
+*** org-remember
+#+BEGIN_SRC emacs-lisp
+(setq org-default-notes-file "~/git/GTD/.notes")
+(define-key global-map [f12] 'org-remember)  
+#+END_SRC
+这样就会把emacs产生的note放在~/git/GTD/.notes中。
+然后按f12就会调出remember，输入你的想法，然后按 ~C-c C-c~ 保存，或者 ~C-c C-k~ 取消。
+org-remember也可以使用模版进行自动分类。
+#+BEGIN_SRC emacs-lisp
+(setq org-remember-templates  
+     '(("TODO" ?t "* TODO %?\n \n %a" "~/git/GTD/Notes.org" "Tasks")  
+       ("IDEA" ?i "* IDEA %?\n %i\n %a" "~/git/GTD/Notes.org" "Idea")  
+))    
+#+END_SRC
+”TODO”是这个模版的名,”?t”是快捷键，”* TODO %?\n %x\n %a”是整个模版体，
+然后是该模版要保存的文件，保存后的项目在文件中处于哪个父节点下面(如果没有会自动新建)。
+他的模版元素意义和org-capture是相同的。
+
+*** org-capture与org-remember比较
+org-remember只能记录headline，而org-capture则提供多种形式以供选择。
+在记录信息时，org-capture使用indirect buffer，而org-remember则使用单独的buffer，
+这个不同很重要。前者相当于直接在源文件上修改，内容不会丢失，所以能够在一次
+capture过程没有结束时再一次调用capture；org-remember则做不到这一点。
+org-remember的优点是撤销操作（C-c C-k）很容易，只要将记录信息的buffer杀掉就可以了；
+而org-capture则在某些情况下无法完美撤销，需要手工操作，比如自动添加的表格行就不得不手工删除。
+
+
+
