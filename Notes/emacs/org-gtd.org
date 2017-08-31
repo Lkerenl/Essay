@@ -147,7 +147,8 @@
 ***** DONE A
 ***** DONE B                                                        :ARCHIVE:
 ***** DONE C
-#+END_EXAMPLE 
+#+END_EXAMPLE
+***** 
   使用 ~C-c C-x A~ 可以的移动任务到本级任务最末端的Achibe中
 #+BEGIN_EXAMPLE org
 **** Task
