@@ -1,0 +1,255 @@
+#+TITLE: Introduction
+[2017-09-06 Wed 15:19]
+by lkerenl in guet
+** 1.3 Write a procedure to output an arbitrary real number(which might be negative) using only PrintDigit for I/O.
+    写一个只使用I/O的PrintDigit，使用这个过程输出任意实数(可以是负数)。
+    首先这个PrintDigit很好写，但是问题是怎么使用它来输出任意实数，实数有什么，有正负整数，
+有0,有小数。首先就是整数，这个简单，可以使用模运算来取得相应的位上的值，再按顺序打印就行。
+但小数部分怎么处理呢，对于这个问题，我想到了位移操作。
+    在x86汇编的SAL能使目的操作数的每一位移动到下一个最高位上，最低位填充0,最高位移入CF，
+原来在CF内的值被丢弃。我们可以写个函数达成类似的效果。
+
+** 思路
+    由易到难的原则：自然数-->整数-->实数。
+
+** PrintDigit 和 sal
+#+BEGIN_SRC c
+struct sal_number{int cf; double decimal;}
+typedef struct sal_number saln;
+void printdigit(int number)
+{
+    printf("%d",number);
+}
+
+saln sal(double decimal)
+{
+    saln a;
+    a.cf = (int)(decimal * 10);
+    a.decimal = decimal * 10 - cf;
+    return a;
+}
+#+END_SRC
+** 非负整数
+#+BEGIN_SRC c
+#include <stdio.h>
+
+void printdigit(int);
+void print_int(int);
+     
+int main(int argc, char *argv[])
+{
+     print_int( 45612387);
+     putchar( '\n');
+     return 0;
+}
+
+void printdigit(int number)
+{
+    printf("%d",number);
+}
+
+void print_int( int number)
+{
+     if ( number>=10)
+          print_int( number/10);
+     printdigit( number%10);
+} 
+#+END_SRC
+** 整数
+   这个很简单， 就开始判断下是不是负的，是的话就加个符号，
+然后取绝对值按正的输出就行。
+#+BEGIN_SRC c
+void print_int( int number)
+{
+     if (number<0)
+     {
+          putchar( '-');
+          number = -number;
+     }
+     if ( number>=10)
+          print_int( number/10);
+     printdigit( number%10);
+}
+#+END_SRC
+** 实数
+   输出实数时，有个问题，就是计算机不能保存精确的浮点数，都是有误差的，虽然误差会小。
+#+BEGIN_EXAMPLE
+─── Source ─────────────────────────────────────────────────────────────────────
+3 {
+4      double a = 123.1234564;
+5      if ( a==( int)a)
+6           printf("Helloworld\n");
+7      
+8      return 0;
+9 }
+─── Stack ──────────────────────────────────────────────────────────────────────
+[0] from 0x000000000040056b in main+69 at test.c:8
+arg argc = 1
+arg argv = 0x7fffffffddb8
+─── Threads ────────────────────────────────────────────────────────────────────
+[1] id 4690 name a.out from 0x000000000040056b in main+69 at test.c:8
+────────────────────────────────────────────────────────────────────────────────
+>>> p a
+$2 = 123.12345639999999
+>>> 
+#+END_EXAMPLE 
+    可以看到a初始化为123.1234564,而它在内存中确为123.12345639999999。所以我们要确定浮点数的精度。
+#+BEGIN_SRC c
+#include <stdio.h>
+
+typedef struct leave{int cf; double number;}le;
+
+le sal(double);
+void print_int(int);
+void printdigit(int);
+void print_double( double,int);
+     
+int main(int argc, char *argv[])
+{
+     print_int( 0);
+     putchar( '\n');
+     print_double( -123.456,3);
+     putchar( '\n');
+     return 0;
+}
+
+void printdigit(int number)
+{
+    printf("%d",number);
+}
+
+le sal(double decimal)
+{
+    le a;
+    a.cf = (int)(decimal * 10);
+    a.number = decimal * 10 - a.cf;
+    return a;
+}
+
+void print_int( int number)
+{
+     if (number<0)
+     {
+          putchar( '-');
+          number = -number;
+     }
+     if ( number>=10)
+          print_int( number/10);
+     printdigit( number%10);
+}
+
+void print_double( double number,int size)
+{
+     le a;
+     int i = 0;
+     
+     if ( number<0)
+     {
+          putchar( '-');
+          number = -number;
+     }
+
+     print_int( (int)number);
+     putchar( '.');
+
+     a.number = number - (int)number;
+     
+     for ( ; i<size; i++)
+     {
+          a = sal( a.number);
+          printdigit( a.cf);
+     }
+}
+
+#+END_SRC
+** 总结
+   基本上我们的目的达成了，但是，我觉得这么写很蠢，有大量的重复代码，所以我决定重构一下。
+#+BEGIN_SRC c
+#include <stdio.h>
+
+typedef struct leave{int cf; double number;}le;
+
+le sal(double);
+void print_int(int);
+void printdigit(int);
+void print_number( double,int);
+void print_double( double,int);
+
+int main(int argc, char *argv[])
+{
+     print_number( 0,0);
+     print_number( 135,0);
+     print_number( -456,0);
+     print_number( 123.1546,4);
+     print_number( -1236.16423,5);
+     return 0;
+}
+
+void printdigit(int number)
+{
+    printf("%d",number);
+}
+
+le sal(double decimal)
+{
+    le a;
+    a.cf = (int)(decimal * 10);
+    a.number = decimal * 10 - a.cf;
+    return a;
+}
+
+void print_int( int number)
+{
+     if ( number>=10)
+          print_int( number/10);
+     printdigit( number%10);
+}
+
+void print_double( double number,int size)
+{
+     le a;
+     int i = 0;
+     
+     print_int( (int)number);
+     putchar( '.');
+
+     a.number = number - (int)number;
+     
+     for ( ; i<size; i++)
+     {
+          a = sal( a.number);
+          printdigit( a.cf);
+     }
+}
+
+void print_number( double number,int size)
+{
+     int i=0;
+     double a;
+     if ( number<0)
+     {
+          putchar( '-');
+          number = -number;
+     }
+     
+     if ( number == (int) number)
+          print_int( (int) number);
+     else
+     {
+          print_double( number,size);
+          
+     }
+     
+     putchar( '\n');
+}
+
+#+END_SRC
+#+BEGIN_EXAMPLE
+➜  ch_1 git:(modify) ✗ ./a.out 
+0
+135
+-456
+123.1546
+-1236.16423
+➜  ch_1 git:(modify) ✗ 
+#+END_EXAMPLE
