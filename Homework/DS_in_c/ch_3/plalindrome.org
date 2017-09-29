@@ -1,0 +1,71 @@
+#+TITLE:  Plalindrome问题
+** 问题描述
+    如何用stack这种数据结构判断一个任意有限长度的字符串是否是回文（类似asdsa,asdfghjkllkjhgfdsa）。
+** 解决方法
+    要解决这个问题，首先先看看回文的特征，假设字符串长度为N，那么根据回文的特点，有这样两种情况：
+        1. N为偶数，则有1与N，2与N-1,3与N-2……依次相同。
+        2. N为奇数，则有除(n+1)/2个元素外，其余n-1个元素按1规律依次相同。
+    那么，解决的方法就很简单了，首先先将字符串全部压入栈中，获取字符串的长度N，判断奇偶，接下来有
+两种情况：
+        1. N为奇数，则M = (n-1)/2.
+        2. N为偶数，则M = n/2.
+    然后将M个字符出栈，并压入另一个栈中，这时若b栈的字符与a栈的前M个字符完全相同则为回文结构。
+
+#+BEGIN_EXAMPLE
+
+              -----------------------------------------------------
+              |                                                   |
++---+---+---+---+---+                                             V
+| a | b | c | b | a |-------> N=5,M=2                          +-----+
++---+---+---+---+---+                                 top ---> |  b  |
+  ^               |                                            +-----+
+  |               -------------------------------------------> |  a  |-----|
+  |                                                            +-----+     |
+  |                                                              base      |
+  |------------------------------------------------------------------------|
+
+#+END_EXAMPLE 
+
+
+代码如下：
+#+BEGIN_SRC c
+bool isPlalindrome( char * string)
+{
+     int i;
+     int n =strlen( string);
+     int m = n/2;                        //in c 7/2 == 6/2 == 3
+     pStack a = init();
+     pStack b = init();
+
+     for ( i=0; i<n;i++)                 //push string one by one in a...
+     {
+          push( a,string[i]);
+     }
+
+     for ( i=0; i<m;i++)                 //pop count backwards in a and push in b...
+     {
+          push( b,pop( a));
+     }
+     
+     
+     return cmpStack(a,b);               //Compare the previous m numbers in stack a and b...
+}
+#+END_SRC
+** 效果
+#+BEGIN_EXAMPLE
+# lkerenl @ VM-194-245-debian in ~/git/Essay/Homework/DS_in_c/ch_3 on git:master x [22:52:11] 
+$ ./a.out 
+no input.
+
+# lkerenl @ VM-194-245-debian in ~/git/Essay/Homework/DS_in_c/ch_3 on git:master x [22:52:14] 
+$ ./a.out abcba 
+True
+
+# lkerenl @ VM-194-245-debian in ~/git/Essay/Homework/DS_in_c/ch_3 on git:master x [22:52:21] 
+$ ./a.out abccba
+True
+
+# lkerenl @ VM-194-245-debian in ~/git/Essay/Homework/DS_in_c/ch_3 on git:master x [22:52:36] 
+$ ./a.out sdasd
+False
+#+END_EXAMPLE
