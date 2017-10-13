@@ -1,0 +1,78 @@
+#+TITLE: 多项式运算
+** 问题描述
+设计一个一元稀疏多项式的简单加减法器，要求：
+1. 和多项式仍占用原来的空间节点
+2. 按指数递增顺序
+3. 核心加法算法要考虑到所有加法情况
+** 解决思路
+*** 数据结构
+多项式的每一项可以用一个结构体储存，只需要储存他的系数和指数就好。
+多项式可以使用一个单链表标识。
+*** 算法
+这个算法的加法是核心。因为减法之需要把减数多项式的每一项取相反数，
+再与另一多项式相加即可。
+加法算法是怎么样的呢， *多项式相加，指数相同，系数相加* 。
+也就是说，我们只要比较多项式的每一项的指数，就能进行判断是否应该相加。
+如果指数不同怎么办，如果多项式a的目标项系数小就将其指向下一项，b也同理。
+所以算法的大体思路是这样的：
+1. 比较A，B 2个多项式的目标项的指数。
+2. 相同：A目标项系数＋B目标项系数
+3. A大于B：b = b->next
+4. A小于B：a = a->next
+5. 循环直到某一多项式结束
+6. 将另一多项式剩余项连接至和多项式
+#+BEGIN_SRC c
+void add(pPolynomial a,pPolynomial b)
+{
+	a->target = a->head;
+	b->target = b->head;
+	while (a->target && b->target)
+		switch (cmp(a->target, b->target))
+		{
+			case  0:
+				a->target->ct += b->target->ct;
+				a->target = a->target->next;
+				b->target = b->target->next;
+				break;
+			case  1:
+				a->target = a->target->next;
+				break;
+			case -1:
+				insert(a,b->target);
+				a->target = a->target->next->next;
+                b->target = b->target->next;
+				break;
+		}
+	if (b->target)
+		{
+			a->tail->next = b->target;
+			a->tail = b->tail;
+		}
+	//clear(b);
+}
+
+#+END_SRC
+** 运行结果
+#+BEGIN_EXAMPLE
+# lkerenl @ VM-194-245-debian in ~/git/Essay/Homework/DS_in_c/ch_4 on git:master x [18:40:35] 
+$ ./a.out 
+input a:
+1 1 2 2 0 0 
+input b:
+-1 1 0 0 
++2.000000x^2%                                                                                                                        
+# lkerenl @ VM-194-245-debian in ~/git/Essay/Homework/DS_in_c/ch_4 on git:master x [18:40:52] 
+$ ./a.out
+input a:
+5 5 2 2 1 1 0 0 
+input b:
+1 1 2 2 0 0 
++2.000000x^1+4.000000x^2+5.000000x^5%                                                                                                
+
+#+END_EXAMPLE
+** 延伸
+*** TODO 使用动态链接库
+    - State "TODO"       from ""           [2017-10-13 Fri 18:44]
+*** TODO 使用后缀表达式使其满足运算规律
+    - State "TODO"       from ""           [2017-10-13 Fri 18:44]
+
